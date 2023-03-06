@@ -1,0 +1,20 @@
+Listener:
+        http: 
+            host: "0.0.0.0"
+            port: "8081"
+Request:
+        http:
+             host: "accounts-implementation-5-1.us-e2.cloudhub.io"
+             port: "80"
+             basepath: "/"
+             client_secret: "A6Db4fB646c14acda9719DEf29D10894"
+             client_id: "132c0a4d6446489cba0827ce1553b8a8"
+vm.queue: "CSR_Input_queue"
+
+accounts:
+  host: "accounts-implementation5-1.us-e2.cloudhub.io"
+  port: "80"
+  basepath: "/"
+  protocol: "HTTP"
+  client_id: "78bc8b265546447387e8f2ed29dba109"
+  client_secret: "Ca95a9c176Fd4813BA24003E965B9Bd9"
