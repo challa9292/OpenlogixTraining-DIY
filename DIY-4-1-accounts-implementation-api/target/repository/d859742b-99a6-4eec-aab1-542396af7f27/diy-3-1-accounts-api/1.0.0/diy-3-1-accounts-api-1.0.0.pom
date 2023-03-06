@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>d859742b-99a6-4eec-aab1-542396af7f27</groupId>
+  <artifactId>diy-3-1-accounts-api</artifactId>
+  <version>1.0.0</version>
+  <name>DIY-3-1-Accounts-api</name>
+  <properties>
+    <classifier>raml</classifier>
+    <main>accounts-api.raml</main>
+    <status>published</status>
+    <originalFormatVersion>1.0</originalFormatVersion>
+    <apiVersion>v1</apiVersion>
+    <projectId>bc4f9667-f069-4a1a-82b3-d09bf0680d62</projectId>
+    <branchId>master</branchId>
+    <commitId>4eab210acf2247800fb9d62f713ac6ad90ef7e52</commitId>
+    <keywords/>
+    <type>rest-api</type>
+    <mainFile>accounts-api.raml</mainFile>
+  </properties>
+  <repositories>
+    <repository>
+      <id>anypoint-exchange</id>
+      <url>https://maven.anypoint.mulesoft.com/api/v3/maven</url>
+    </repository>
+  </repositories>
+</project>

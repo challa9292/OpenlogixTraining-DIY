@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="diy-6-1-accounts-accessing-and-modifying-mule-eventsFlow" doc:id="b707351b-8ad3-419f-adc2-e0b8efcd6872" >
+		<http:listener doc:name="GET /Accounts-based-on-name" doc:id="ebc87f93-7a2e-49fd-9e1c-826d78330ca2" config-ref="HTTP_Listener_config" path="/accounts-name">
+			<http:response >
+				<http:headers ><![CDATA[#[{
+	number_of_accounts: sizeOf(payload as Array),
+	account_name: vars.accountName,
+	csr_user_id: vars.userId
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<logger level="INFO" doc:name="Started Mule Message" doc:id="ea61e5fe-0059-4958-8f2e-39202f5baa5e" />
+		<set-variable value="attributes.headers.csr_user_id" doc:name="userId" doc:id="155cdda7-af85-4a64-9248-7a7e5c589ae4" variableName="userId"/>
+		<set-variable value="#[attributes.queryParams.custName]" doc:name="accountName" doc:id="081b6b42-b31f-4558-a8e6-84e66da183a7" variableName="accountName"/>
+		<http:request method="GET" doc:name="Get Accounts-by-name" doc:id="4110c83d-9ee9-40e1-933e-64a65202a2a0" path="/accounts" config-ref="HTTP_Request_configuration">
+			<http:headers ><![CDATA[#[{
+	user_id : vars.userId,
+	client_id: "908320025ffb4866a35e6f0126eb16b9",
+	client_secret: "cEfc4D5945A14a69bCBEd0D77661776c"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[{
+	account_name: vars.accountName
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="Mule Message Ended" doc:id="961376d3-93c9-4957-a256-9d232376dd20" message="#['Count: ' ++ sizeOf(payload as Array)]"/>
+	</flow>
+	<flow name="diy-6-1-accounts-accessing-and-modifying-mule-eventsFlow1" doc:id="e1697e3f-7853-4349-945d-9ab5d494c28d" >
+		<http:listener doc:name="Listener" doc:id="61da124f-5b49-47fa-a2d2-22f941cbdb6a" config-ref="HTTP_Listener_config" path="/accounts-by-type">
+			<http:response >
+				<http:headers ><![CDATA[#[{
+	number_of_accounts: sizeOf(payload as Array),
+	account_type: vars.accountType,
+	csr_user_id: vars.userId
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<logger level="INFO" doc:name="Started Mule Message" doc:id="f8f91d47-b34f-4dd1-aab4-34287a820fd7" />
+		<set-variable value="attributes.headers.csr_user_id" doc:name="userId" doc:id="4bf6954b-1f2f-4ec8-8306-6f7550fee380" variableName="userId"/>
+		<set-variable value='#[attributes.queryParams.custType default "business"]' doc:name="accountType" doc:id="2f31007a-8933-458a-885a-19af3efb89bf" variableName="accountType"/>
+		<http:request method="GET" doc:name="Request" doc:id="907457c7-1eaf-449d-9d4e-0cf23ee8c5bc" config-ref="HTTP_Request_configuration" path="/accounts">
+			<http:headers ><![CDATA[#[{
+	user_id : vars.userId,
+	client_id: "132c0a4d6446489cba0827ce1553b8a8",
+	client_secret: "A6Db4fB646c14acda9719DEf29D10894"
+}]]]></http:headers>
+			<http:query-params ><![CDATA[#[{
+	account_type: vars.accountType
+}]]]></http:query-params>
+		</http:request>
+		<set-variable value="#[sizeOf(payload as Array)]" doc:name="Set Variable" doc:id="c6444b3b-3c23-4af8-b129-d3bea5bfe714" variableName="count"/>
+		<logger level="INFO" doc:name="Mue Message Ended" doc:id="c0e393d6-0aa3-4e59-a164-8b5181a68d62" message="#['Count: ' ++ vars.count as Number]"/>
+	</flow>
+</mule>
