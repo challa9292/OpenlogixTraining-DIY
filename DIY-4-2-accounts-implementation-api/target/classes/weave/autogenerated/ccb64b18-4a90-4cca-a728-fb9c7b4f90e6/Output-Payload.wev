@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_ccb64b18_4a90_4cca_a728_fb9c7b4f90e6_Output_Payload = Array<{|  id: Number,   name: String,   "type": String,   address: String,   air_miles: Number,   created_at: String|}>
+
