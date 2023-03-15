@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="read-db-accounts-to-csv-auto-watermarking" doc:id="1d4c6790-660f-47a6-8ff8-6e7d92d9889c" >
+		<db:listener table="flights_customers" doc:name="customers_flights" doc:id="6eb443cf-31d9-4837-a4db-af4bbf2dec49" config-ref="MySQL_Database_Config" watermarkColumn="accountID" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS" />
+			</scheduling-strategy>
+		</db:listener>
+		<set-variable value='#[Mule::p("accounts.folder.out") ++ &#10;Mule::p("accounts.filename.prefix") ++ "-" ++ &#10;dw::core::Strings::dasherize(payload.country as String) ++ "-" ++&#10;now() as String {format: "yyyyMMdd"} ++&#10;Mule::p("accounts.filename.ext")]' doc:name="fileName" doc:id="6bb1f944-a98c-49be-a65b-70cdfa543c22" variableName="fileName" />
+		<file:write doc:name="Accounts per country per date" doc:id="87e1e849-a3d2-408a-b14f-5bf347e4eb70" path="#[vars.fileName]" mode="APPEND" >
+			<file:content ><![CDATA[#[output application/csv header=false
+---
+payload]]]></file:content>
+		</file:write>
+		<logger level="INFO" doc:name="Logger" doc:id="d8d1034d-7957-409b-878b-c2498e2e19c9" message="#[output application/json --- {&#10;	filename: vars.fileName,&#10;	p: payload&#10;}]" />
+	</flow>
+</mule>
