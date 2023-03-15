@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="5bc32816-f454-4659-8cc9-62394be6af7d" >
+		<wsc:connection wsdlLocation="${transactions.wsdl}" service="${transactions.service}" port="${transactions.port}" address="${transactions.address}">
+			<wsc:web-service-security actor="http://schemas.xmlsoap.org/soap/actor/next" />
+		</wsc:connection>
+	</wsc:config>
+	<flow name="accounts-by-Id" doc:id="330edf05-5867-4042-ae2f-58af4df09468" >
+		<http:listener doc:name="Get /account-by-Id" doc:id="8b3f5e23-1d93-4263-a9ca-f6e22e368b79" config-ref="HTTP_Listener_config" path="/accounts/{id}/transaction"/>
+		<set-variable value="#[attributes.headers.userId]" doc:name="userId" doc:id="6278d184-5193-43f6-bc46-20c4e62ed447" variableName="userId"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="accountId" doc:id="9133782b-e2f9-41e1-be0d-86a1a7bcc48b" variableName="accountId"/>
+		<ee:transform doc:name="transform account_ID" doc:id="0117552f-4414-4668-b606-562f40c7681a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://training.mulesoft.com/
+---
+{
+	ns0#GetTransactionsforCustomers: {
+		customerID: vars.accountId as String
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume doc:name="Consume" doc:id="5315be67-67e3-4780-b343-5f68066f784a" config-ref="Web_Service_Consumer_Config" operation="GetTransactionsforCustomers"/>
+		<set-variable value="#[sizeOf(payload..*transaction default [])]" doc:name="totalTransactions" doc:id="335a906b-242f-4788-94a8-56fe0805bfb2" variableName="totalTransactions"/>
+		<ee:transform doc:name="Transform Message" doc:id="c695d8ac-2f2d-4052-9829-2d75dbf69073" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "total" : payload..*transaction reduce (n,a=0) -> (a + n.amount as Number),
+    "transactions": flatten(payload pluck $.*transaction)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="getAllTransactions" doc:id="5e5b6ca9-123d-4c42-a746-5a798a9c4ba0" >
+		<http:listener doc:name="Listener" doc:id="4c2d1623-6630-4b46-aff4-5f5352221bfc" config-ref="HTTP_Listener_config" path="/transactions"/>
+		<set-variable value="#[attributes.headers.userId]" doc:name="userId" doc:id="0966ad3b-28ea-4143-b21c-2937edb37e1d" variableName="userId"/>
+		<set-variable value="attributes.uriParams.id" doc:name="accountId" doc:id="b5ea1fd0-07d1-4566-86ff-5b9f7f3158e1" variableName="accountId"/>
+		<wsc:consume doc:name="Consume" doc:id="9484fbfc-6a02-45c1-936c-2c3429041dc8" config-ref="Web_Service_Consumer_Config" operation="GetAllTransactions"/>
+		<set-variable value="#[sizeOf(payload..*transaction default [])]" doc:name="totalTransactions" doc:id="beec6c34-0090-481a-bf6c-18c227a66f60" variableName="totalTransactions"/>
+		<ee:transform doc:name="Transform Message" doc:id="29bf9f66-ebb5-4a5c-8b17-7f526779d0ec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"transaction":payload.body,
+	"count": vars.totalTransactions,
+	"userID": vars.userId,
+	"accountID": vars.accountId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
